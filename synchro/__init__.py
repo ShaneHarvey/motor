@@ -282,7 +282,15 @@ class SynchroMeta(type):
         return new_class
 
 
-class Synchro(object):
+def with_metaclass(metaclass, *bases):
+    """Python 2/3 compatible metaclass helper."""
+    class _metaclass(metaclass):
+        def __new__(mcls, name, _bases, attrs):
+            return metaclass(name, bases, attrs)
+    return type.__new__(_metaclass, str('dummy'), (), {})
+
+
+class Synchro(with_metaclass(SynchroMeta)):
     """
     Wraps a MotorClient, MotorDatabase, MotorCollection, etc. and
     makes it act like the synchronous pymongo equivalent
@@ -292,6 +300,13 @@ class Synchro(object):
 
     def __cmp__(self, other):
         return cmp(self.delegate, other.delegate)
+
+    def __eq__(self, other):
+        if (isinstance(other, self.__class__)
+                and hasattr(self, 'delegate')
+                and hasattr(other, 'delegate')):
+            return self.delegate == other.delegate
+        return NotImplemented
 
     def synchronize(self, async_method):
         """
