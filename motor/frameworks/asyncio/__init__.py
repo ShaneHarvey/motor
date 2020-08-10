@@ -86,6 +86,9 @@ def chain_return_value(future, loop, return_value):
     return values resolve a Future with it, and are implemented with callbacks
     rather than a coroutine internally.
     """
+    warnings.warn(
+        "chain_return_value is deprecated and will be removed in Motor 3.0",
+        DeprecationWarning, stacklevel=2)
     chained = loop.create_future()
 
     def copy(_future):

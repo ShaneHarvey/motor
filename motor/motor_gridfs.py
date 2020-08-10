@@ -148,6 +148,10 @@ class AgnosticGridOut(object):
 
         return getattr(self.delegate, item)
 
+    def _open(self):
+        self.delegate._ensure_file()
+        return self
+
     @coroutine_annotation
     def open(self):
         """Retrieve this file's attributes from the server.
@@ -161,9 +165,7 @@ class AgnosticGridOut(object):
            :class:`~motor.MotorGridOut` now opens itself on demand, calling
            ``open`` explicitly is rarely needed.
         """
-        return self._framework.chain_return_value(self._ensure_file(),
-                                                  self.get_io_loop(),
-                                                  self)
+        return self._framework.run_on_executor(self.get_io_loop(), self._open)
 
     def get_io_loop(self):
         return self.io_loop
