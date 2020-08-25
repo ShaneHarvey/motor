@@ -42,6 +42,15 @@ class TestAsyncIODatabase(AsyncIOTestCase):
         doc = await db.test_collection.find_one({'_id': 1})
         self.assertEqual(1, doc['_id'])
 
+    @asyncio_test
+    async def test_database_subclass(self):
+        class MyDB(AsyncIOMotorDatabase):
+            async def ping(self):
+                return await self.command('ping')
+        db = MyDB(self.cx, 'motor_test')
+        res = await db.ping()
+        self.assertTrue(res['ok'])
+
     def test_collection_named_delegate(self):
         db = self.db
         self.assertTrue(isinstance(db.delegate, pymongo.database.Database))
